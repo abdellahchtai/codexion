@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 09:47:29 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/07/21 15:13:40 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/07/26 20:04:37 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void	init_dongle(t_dongle *dongles, int limit)
 	}
 }
 
-int	init_coders(t_coder *coders, t_args *args, t_dongle *dongles, int limit)
+void	init_coders(t_coder *coders, t_args *args, t_dongle *dongles, int limit)
 {
 	int	i;
 
@@ -51,13 +51,26 @@ int	init_coders(t_coder *coders, t_args *args, t_dongle *dongles, int limit)
 	while (i < limit)
 	{
 		coders[i].coder_id = i + 1;
+		coders[i].last_compile = get_time_on_ms(NULL, 0);
 		coders[i].args = args;
 		coders[i].dongles = dongles;
+		pthread_mutex_init(&(coders[i].mutex_last_compile), NULL);
+		i++;
+	}
+}
+
+int	create_coders_threads(t_coder *coders)
+{
+	int	i;
+
+	i = 0;
+	while (i < coders->args->nb_of_coders)
+	{
 		if (pthread_create(&(coders[i].thread_id), NULL, coders_routine,
 				&(coders[i])))
 			return (fprintf(stderr,
 					"Error: Main thread faild to creat thread number %d.\n", i
-					+ 1), args->nb_of_coders = i, 0);
+					+ 1), coders->args->nb_of_coders = i, 0);
 		i++;
 	}
 	return (1);
@@ -70,7 +83,8 @@ int	init_all(t_coder **coders, t_dongle **dongles, t_args *args,
 	if (!(*coders))
 		return (0);
 	init_dongle(*dongles, args->nb_of_coders);
-	if (!init_coders(*coders, args, *dongles, args->nb_of_coders))
-		return (0);
-	return (1);
+	init_coders(*coders, args, *dongles, args->nb_of_coders);
+	(*coders)->args->start_simu = get_time_on_ms(NULL, 0);
+	pthread_create(&args->burnout_thread, NULL, burnout_checker, *coders);
+	return (create_coders_threads(*coders));
 }

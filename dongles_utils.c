@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   coders_routine_utils.c                             :+:      :+:    :+:   */
+/*   dongles_utils.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/16 16:33:54 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/07/21 15:10:08 by abchtaib         ###   ########.fr       */
+/*   Created: 2026/07/26 19:32:22 by abchtaib          #+#    #+#             */
+/*   Updated: 2026/07/26 20:05:21 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,17 +19,6 @@ int	dongle_ready(t_dongle *dongle, int first, int second)
 	time_now = get_time_on_ms(NULL, 0);
 	return (dongle[first].available_at <= time_now
 		&& dongle[second].available_at <= time_now);
-}
-
-long	get_time_on_ms(t_coder *coder, int time_stamp_flag)
-{
-	struct timeval	time;
-
-	gettimeofday(&time, NULL);
-	if (!time_stamp_flag)
-		return (time.tv_sec * 1000 + time.tv_usec / 1000);
-	return ((time.tv_sec * 1000 + time.tv_usec / 1000)
-		- coder->args->start_simu);
 }
 
 void	get_dongle_order(t_coder coder, int *first, int *last)
@@ -54,14 +43,30 @@ void	get_dongle_order(t_coder coder, int *first, int *last)
 	}
 }
 
-void	joining_threads(t_coder *coders, int nb_of_coders)
+long	ft_max(long time1, long time2)
 {
-	int	i;
+	if (time1 >= time2)
+		return (time1);
+	return (time2);
+}
 
-	i = 0;
-	while (i < nb_of_coders)
-	{
-		pthread_join(coders[i].thread_id, NULL);
-		i++;
-	}
+void	wait_for_dongles(t_coder *coder, int dg1, int dg2)
+{
+	long			max;
+	struct timespec	timeout;
+
+	max = ft_max(coder->dongles[dg1].available_at,
+		coder->dongles[dg2].available_at);
+	timeout.tv_sec = max / 1000;
+	timeout.tv_nsec = max % 1000 * 1000000;
+	pthread_mutex_lock(&(coder->args->mutex_wait));
+	pthread_cond_timedwait(&(coder->args->cond_wait),
+		&(coder->args->mutex_wait), &timeout);
+	pthread_mutex_unlock(&(coder->args->mutex_wait));
+}
+
+void	unlock_dongle(t_coder *coder, int dongle1, int dongle2)
+{
+	pthread_mutex_unlock(&(coder->dongles[dongle1].mutex));
+	pthread_mutex_unlock(&(coder->dongles[dongle2].mutex));
 }

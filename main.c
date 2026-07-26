@@ -6,29 +6,11 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:23:31 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/07/21 15:10:21 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/07/26 19:40:41 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
-
-int	ft_clean_up(t_coder *coders, t_cleaner cleanup)
-{
-	int	i;
-
-	i = 0;
-	joining_threads(coders, coders->args->nb_of_coders);
-	while (i < coders->args->nb_of_coders)
-	{
-		pthread_mutex_destroy(&(coders->dongles[i].mutex));
-		i++;
-	}
-	pthread_mutex_destroy(&(coders->args->mutex_wait));
-	pthread_cond_destroy(&(coders->args->cond_wait));
-	free(cleanup.coders);
-	free(cleanup.dongels);
-	return (1);
-}
 
 int	main(int ac, char **av)
 {
