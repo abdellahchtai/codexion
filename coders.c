@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/26 19:35:57 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/07/26 20:06:35 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/07/27 12:10:40 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,20 +57,21 @@ void	compile(t_coder *coder)
 	get_dongle_order(*coder, &dongle1, &dongle2);
 	while (!is_burnout(coder->args))
 	{
-		pthread_mutex_lock(&(coder->dongles[dongle1].mutex));
-		pthread_mutex_lock(&(coder->dongles[dongle2].mutex));
+		lock_unlock_dongle(coder, dongle1, dongle2, 1);
 		if (is_burnout(coder->args))
-			return (unlock_dongle(coder, dongle1, dongle2));
+			return (lock_unlock_dongle(coder, dongle1, dongle2, 0));
 		if (dongle_ready(coder->dongles, dongle1, dongle2))
 		{
 			start_compile(coder, dongle1, dongle2);
-			unlock_dongle(coder, dongle1, dongle2);
-			pthread_cond_broadcast(&coder->args->cond_wait);
+			lock_unlock_dongle(coder, dongle1, dongle2, 0);
+			pthread_mutex_lock(&coder->args->shared->mutex_wait);
+			pthread_cond_broadcast(&coder->args->shared->cond_wait);
+			pthread_mutex_unlock(&coder->args->shared->mutex_wait);
 			return ;
 		}
 		else
 		{
-			unlock_dongle(coder, dongle1, dongle2);
+			lock_unlock_dongle(coder, dongle1, dongle2, 0);
 			wait_for_dongles(coder, dongle1, dongle2);
 		}
 	}
@@ -98,8 +99,8 @@ void	*coders_routine(void *args)
 			return (NULL);
 		repeat--;
 	}
-	pthread_mutex_lock(&(coder->args->finished_mutex));
-	coder->args->finished_coders++;
-	pthread_mutex_unlock(&(coder->args->finished_mutex));
+	pthread_mutex_lock(&(coder->args->shared->finished_mutex));
+	coder->args->shared->finished_coders++;
+	pthread_mutex_unlock(&(coder->args->shared->finished_mutex));
 	return (NULL);
 }

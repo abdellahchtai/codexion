@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 09:47:29 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/07/26 20:04:37 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/07/27 12:27:16 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,7 @@ int	init_all(t_coder **coders, t_dongle **dongles, t_args *args,
 	init_dongle(*dongles, args->nb_of_coders);
 	init_coders(*coders, args, *dongles, args->nb_of_coders);
 	(*coders)->args->start_simu = get_time_on_ms(NULL, 0);
-	pthread_create(&args->burnout_thread, NULL, burnout_checker, *coders);
+	pthread_create(&args->shared->burnout_thread, NULL,
+		burnout_checker, *coders);
 	return (create_coders_threads(*coders));
 }

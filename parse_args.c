@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/09 16:39:26 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/07/26 20:04:46 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/07/27 12:07:19 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ int	set_args_value(char **av, int *numbers)
 	return (1);
 }
 
-int	init_args(char **av, t_args *args)
+int	init_args(char **av, t_args *args, t_shared *shared)
 {
 	int	numbers[7];
 
@@ -98,13 +98,14 @@ int	init_args(char **av, t_args *args)
 	args->time_to_refactor = numbers[4];
 	args->nb_of_compiles_required = numbers[5];
 	args->dongle_cooldown = numbers[6];
-	args->finished_coders = 0;
-	args->burnout_flag = 0;
-	pthread_mutex_init(&(args->mutex_wait), NULL);
-	pthread_mutex_init(&(args->finished_mutex), NULL);
-	pthread_mutex_init(&(args->print_mutex), NULL);
-	pthread_mutex_init(&(args->burnout_flag_mutex), NULL);
-	pthread_cond_init(&(args->cond_wait), NULL);
+	args->shared = shared;
+	shared->finished_coders = 0;
+	shared->burnout_flag = 0;
+	pthread_mutex_init(&shared->mutex_wait, NULL);
+	pthread_mutex_init(&shared->finished_mutex, NULL);
+	pthread_mutex_init(&shared->print_mutex, NULL);
+	pthread_mutex_init(&shared->burnout_flag_mutex, NULL);
+	pthread_cond_init(&shared->cond_wait, NULL);
 	if (!strcmp(av[8], "fifo") || !strcmp(av[8], "edf"))
 		return (args->scheduler = av[8], 1);
 	return (fprintf(stderr,

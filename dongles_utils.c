@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/26 19:32:22 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/07/26 20:05:21 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/07/27 12:11:02 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,18 +55,26 @@ void	wait_for_dongles(t_coder *coder, int dg1, int dg2)
 	long			max;
 	struct timespec	timeout;
 
+	lock_unlock_dongle(coder, dg1, dg2, 1);
 	max = ft_max(coder->dongles[dg1].available_at,
-		coder->dongles[dg2].available_at);
+			coder->dongles[dg2].available_at);
+	lock_unlock_dongle(coder, dg1, dg2, 0);
 	timeout.tv_sec = max / 1000;
 	timeout.tv_nsec = max % 1000 * 1000000;
-	pthread_mutex_lock(&(coder->args->mutex_wait));
-	pthread_cond_timedwait(&(coder->args->cond_wait),
-		&(coder->args->mutex_wait), &timeout);
-	pthread_mutex_unlock(&(coder->args->mutex_wait));
+	pthread_mutex_lock(&(coder->args->shared->mutex_wait));
+	pthread_cond_timedwait(&(coder->args->shared->cond_wait),
+		&(coder->args->shared->mutex_wait), &timeout);
+	pthread_mutex_unlock(&(coder->args->shared->mutex_wait));
 }
 
-void	unlock_dongle(t_coder *coder, int dongle1, int dongle2)
+void	lock_unlock_dongle(t_coder *coder, int dongle1, int dongle2, int lock)
 {
+	if (lock)
+	{
+		pthread_mutex_lock(&(coder->dongles[dongle1].mutex));
+		pthread_mutex_lock(&(coder->dongles[dongle2].mutex));
+		return ;
+	}
 	pthread_mutex_unlock(&(coder->dongles[dongle1].mutex));
 	pthread_mutex_unlock(&(coder->dongles[dongle2].mutex));
 }

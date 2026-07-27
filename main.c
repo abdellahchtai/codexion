@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:23:31 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/07/26 19:40:41 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/07/27 12:20:27 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 int	main(int ac, char **av)
 {
+	t_shared	shared;
 	t_args		args;
 	t_coder		*coders;
 	t_dongle	*dongles;
@@ -22,10 +23,10 @@ int	main(int ac, char **av)
 	if (ac - 1 != 8)
 		return (fprintf(stderr, "Error: Expecting 8 arguments.Given %d.\n", ac
 				- 1));
-	if (!init_args(av, &args))
+	if (!init_args(av, &args, &shared))
 		return (1);
 	if (!init_all(&coders, &dongles, &args, &cleanup))
-		return (ft_clean_up(coders, cleanup));
-	ft_clean_up(coders, cleanup);
+		return (ft_clean_up(cleanup), 1);
+	ft_clean_up(cleanup);
 	return (0);
 }
