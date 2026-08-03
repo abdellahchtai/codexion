@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/09 16:39:26 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/07/27 12:07:19 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/02 13:30:42 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,29 +83,28 @@ int	set_args_value(char **av, int *numbers)
 	return (1);
 }
 
-int	init_args(char **av, t_args *args, t_shared *shared)
+int	init_args(char **av, t_args *args)
 {
 	int	numbers[7];
 
 	if (!check_args(av) || !set_args_value(av, numbers))
 		return (0);
 	args->nb_of_coders = numbers[0];
-	if (args->nb_of_coders < 2)
-		return (printf("Error: Coders must be more than 1.\n"), 0);
+	if (args->nb_of_coders < 1)
+		return (printf("Error: Coders must be more than 0.\n"), 0);
 	args->time_to_burnout = numbers[1];
 	args->time_to_compile = numbers[2];
 	args->time_to_debug = numbers[3];
 	args->time_to_refactor = numbers[4];
 	args->nb_of_compiles_required = numbers[5];
 	args->dongle_cooldown = numbers[6];
-	args->shared = shared;
-	shared->finished_coders = 0;
-	shared->burnout_flag = 0;
-	pthread_mutex_init(&shared->mutex_wait, NULL);
-	pthread_mutex_init(&shared->finished_mutex, NULL);
-	pthread_mutex_init(&shared->print_mutex, NULL);
-	pthread_mutex_init(&shared->burnout_flag_mutex, NULL);
-	pthread_cond_init(&shared->cond_wait, NULL);
+	args->finished_coders = 0;
+	args->burnout_flag = 0;
+	args->fifo_order = 0;
+	pthread_mutex_init(&args->finished_mutex, NULL);
+	pthread_mutex_init(&args->print_mutex, NULL);
+	pthread_mutex_init(&args->burnout_flag_mutex, NULL);
+	pthread_mutex_init(&args->mtx_fifo, NULL);
 	if (!strcmp(av[8], "fifo") || !strcmp(av[8], "edf"))
 		return (args->scheduler = av[8], 1);
 	return (fprintf(stderr,

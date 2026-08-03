@@ -6,75 +6,82 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/26 19:32:22 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/07/27 12:11:02 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/03 20:24:57 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-int	dongle_ready(t_dongle *dongle, int first, int second)
+int	dongle_ready(t_dongle *dongle, int coder_id)
 {
-	long	time_now;
+	long	now;
 
-	time_now = get_time_on_ms(NULL, 0);
-	return (dongle[first].available_at <= time_now
-		&& dongle[second].available_at <= time_now);
+	now = get_time_on_ms(NULL);
+	return (dongle->available && dongle->available_at <= now && heap_top(dongle) == coder_id);
 }
 
-void	get_dongle_order(t_coder coder, int *first, int *last)
+int	have_dongle(t_coder *coder, int dg_id)
 {
-	int	right_dg;
-	int	left_dg;
+	t_request		req;
+	t_dongle		*dongle;
+	struct timeval	tv;
+	struct timespec	ts;
 
-	left_dg = coder.coder_id - 1;
-	if (coder.coder_id == 1)
-		right_dg = coder.args->nb_of_coders - 1;
-	else
-		right_dg = coder.coder_id - 2;
-	if (right_dg < left_dg)
-	{
-		*first = right_dg;
-		*last = left_dg;
-	}
+	dongle = &coder->dongles[dg_id];
+	req.coder_id = coder->coder_id;
+	if (coder->args->scheduler[0] == 'f')
+		req.key = get_next_ticket(coder->args);
 	else
 	{
-		*first = left_dg;
-		*last = right_dg;
+		pthread_mutex_lock(&coder->mutex_last_compile);
+		req.key = coder->last_compile + coder->args->time_to_burnout;
+		pthread_mutex_unlock(&coder->mutex_last_compile);
 	}
-}
-
-long	ft_max(long time1, long time2)
-{
-	if (time1 >= time2)
-		return (time1);
-	return (time2);
-}
-
-void	wait_for_dongles(t_coder *coder, int dg1, int dg2)
-{
-	long			max;
-	struct timespec	timeout;
-
-	lock_unlock_dongle(coder, dg1, dg2, 1);
-	max = ft_max(coder->dongles[dg1].available_at,
-			coder->dongles[dg2].available_at);
-	lock_unlock_dongle(coder, dg1, dg2, 0);
-	timeout.tv_sec = max / 1000;
-	timeout.tv_nsec = max % 1000 * 1000000;
-	pthread_mutex_lock(&(coder->args->shared->mutex_wait));
-	pthread_cond_timedwait(&(coder->args->shared->cond_wait),
-		&(coder->args->shared->mutex_wait), &timeout);
-	pthread_mutex_unlock(&(coder->args->shared->mutex_wait));
-}
-
-void	lock_unlock_dongle(t_coder *coder, int dongle1, int dongle2, int lock)
-{
-	if (lock)
+	pthread_mutex_lock(&dongle->lock);
+	heap_push(dongle, req);
+	while (!dongle_ready(dongle, coder->coder_id) && !is_burnout(coder->args))
 	{
-		pthread_mutex_lock(&(coder->dongles[dongle1].mutex));
-		pthread_mutex_lock(&(coder->dongles[dongle2].mutex));
-		return ;
+		gettimeofday(&tv, NULL);
+		ts.tv_sec = tv.tv_sec;
+		ts.tv_nsec = tv.tv_usec * 1000 + 2000000;
+		pthread_cond_timedwait(&dongle->cond, &dongle->lock, &ts);
 	}
-	pthread_mutex_unlock(&(coder->dongles[dongle1].mutex));
-	pthread_mutex_unlock(&(coder->dongles[dongle2].mutex));
+	if (is_burnout(coder->args))
+		return (pthread_mutex_unlock(&dongle->lock), 0);
+	heap_pop(dongle);
+	dongle->available = 0;
+	pthread_mutex_unlock(&dongle->lock);
+	ft_printf_mutex(coder, "has taken a dongle");
+	return (1);
+}
+
+void	put_dongle(t_dongle *dongle, int cooldown)
+{
+	long	now;
+	
+	now = get_time_on_ms(NULL);
+	pthread_mutex_lock(&dongle->lock);
+	dongle->available = 1;
+	dongle->available_at = now + cooldown;
+	pthread_mutex_unlock(&dongle->lock);
+	pthread_cond_broadcast(&dongle->cond);
+}
+
+void	release_dongles(t_coder *coder)
+{
+	int	cooldown;
+	
+	cooldown = coder->args->dongle_cooldown;
+	put_dongle(&coder->dongles[coder->first_dg], cooldown);
+	put_dongle(&coder->dongles[coder->second_dg], cooldown);
+}
+
+int	get_both_dongles(t_coder *coder)
+{
+	if (!have_dongle(coder, coder->first_dg))
+		return (0);
+	if (!have_dongle(coder, coder->second_dg))
+		return(put_dongle(&coder->dongles[coder->first_dg],
+				coder->args->dongle_cooldown), 0);
+	return (1);
 }
