@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:23:31 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/07/31 11:47:16 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/05 17:25:06 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ int	main(int ac, char **av)
 	if (!init_args(av, &args))
 		return (1);
 	if (!init_all(&coders, &dongles, &args))
-		return (ft_clean_up(coders), 1);
+		return (1);
 	ft_clean_up(coders);
 	return (0);
 }

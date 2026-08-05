@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 09:47:29 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/03 19:12:07 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/05 17:17:31 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@ t_coder	*create_coders_dongles(int nb_of_creation, t_dongle **dongles)
 		return (printf("Error: To many coders to create.\n"), NULL);
 	*dongles = malloc(sizeof(t_dongle) * nb_of_creation);
 	if (!(*dongles))
-		return (free(coders), printf("Error: To man dongles to create.\n"), NULL);
+		return (free(coders), printf("Error: To man dongles to create.\n"),
+			NULL);
 	return (coders);
 }
 
@@ -37,7 +38,7 @@ int	init_dongle(t_dongle *dongles, int limit)
 		dongles[i].heap_size = 0;
 		dongles[i].heap_capacity = 2;
 		dongles[i].heap = malloc(sizeof(t_request) * dongles[i].heap_capacity);
-		if(!dongles[i].heap)
+		if (!dongles[i].heap)
 			return (clean_dongle(dongles, i), 0);
 		pthread_mutex_init(&(dongles[i].lock), NULL);
 		pthread_cond_init(&(dongles[i].cond), NULL);
@@ -62,7 +63,6 @@ void	init_coders(t_coder *coders, t_args *args, t_dongle *dongles, int limit)
 			coders[i].first_dg = i;
 			coders[i].second_dg = args->nb_of_coders - 1;
 		}
-		
 		coders[i].last_compile = get_time_on_ms(NULL);
 		coders[i].args = args;
 		coders[i].dongles = dongles;
@@ -92,10 +92,9 @@ int	init_all(t_coder **coders, t_dongle **dongles, t_args *args)
 {
 	*coders = create_coders_dongles(args->nb_of_coders, dongles);
 	if (!(*coders) || !init_dongle(*dongles, args->nb_of_coders))
-		return (0);		
+		return (free(*coders), destroy_shared_rsc(args), 0);
 	init_coders(*coders, args, *dongles, args->nb_of_coders);
 	(*coders)->args->start_simu = get_time_on_ms(NULL);
-	pthread_create(&args->burnout_thread, NULL,
-		burnout_checker, *coders);
+	pthread_create(&args->burnout_thread, NULL, burnout_checker, *coders);
 	return (create_coders_threads(*coders));
 }

@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/26 19:29:43 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/03 15:01:44 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/05 17:22:03 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,11 @@ void	ft_sleep(long time_to_sleep, t_args *args)
 	}
 }
 
-void	ft_printf_mutex(t_coder *coder, char *str)
+void	ft_printf_mutex(t_coder *coder, char *str, int burnout)
 {
 	pthread_mutex_lock(&coder->args->print_mutex);
-	printf("%ld %d %s\n", get_time_on_ms(coder), coder->coder_id, str);
+	if (!is_burnout(coder->args) || burnout)
+		printf("%ld %d %s\n", get_time_on_ms(coder), coder->coder_id, str);
 	pthread_mutex_unlock(&coder->args->print_mutex);
 }
 
@@ -43,12 +44,18 @@ long	get_time_on_ms(t_coder *coder)
 		- coder->args->start_simu);
 }
 
-long	get_next_ticket(t_args *args)
+void	wait_dongles(t_dongle *first, t_dongle *second)
 {
-	long	ticket;
+	struct timeval	tv;
+	struct timespec	ts;
 
-	pthread_mutex_lock(&args->mtx_fifo);
-	ticket = args->fifo_order++;
-	pthread_mutex_unlock(&args->mtx_fifo);
-	return (ticket);
+	gettimeofday(&tv, NULL);
+	ts.tv_sec = tv.tv_sec;
+	ts.tv_nsec = tv.tv_usec * 1000 + 2000000;
+	pthread_mutex_lock(&first->lock);
+	pthread_cond_timedwait(&first->cond, &first->lock, &ts);
+	pthread_mutex_unlock(&first->lock);
+	pthread_mutex_lock(&second->lock);
+	pthread_cond_timedwait(&second->cond, &second->lock, &ts);
+	pthread_mutex_unlock(&second->lock);
 }

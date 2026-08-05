@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/27 11:59:29 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/03 12:56:39 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/05 17:28:20 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void	clean_dongle(t_dongle *dongles, int nb_of_dongles)
 		pthread_cond_destroy(&dongles[i].cond);
 		pthread_mutex_destroy(&dongles[i].lock);
 		free(dongles[i].heap);
-		i++;	
+		i++;
 	}
 	free(dongles);
 }

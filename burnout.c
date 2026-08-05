@@ -6,21 +6,11 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/26 19:04:16 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/03 15:01:26 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/05 17:22:58 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
-
-int	is_burnout(t_args *args)
-{
-	int	burnout;
-
-	pthread_mutex_lock(&args->burnout_flag_mutex);
-	burnout = args->burnout_flag;
-	pthread_mutex_unlock(&args->burnout_flag_mutex);
-	return (burnout);
-}
 
 void	set_burnout_flag(t_args *args)
 {
@@ -46,7 +36,6 @@ int	check_last_compilation(t_coder *coder)
 
 	if (coder->finished)
 		return (0);
-
 	flag = 0;
 	pthread_mutex_lock(&(coder->mutex_last_compile));
 	now = get_time_on_ms(NULL);
@@ -86,7 +75,7 @@ void	*burnout_checker(void *args)
 			if (check_last_compilation(&coders[i]))
 			{
 				set_burnout_flag(coders->args);
-				ft_printf_mutex(&coders[i], "burned out");
+				ft_printf_mutex(&coders[i], "burned out", 1);
 				broadcast_all_coders(coders);
 				return (NULL);
 			}
