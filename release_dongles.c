@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/04 17:15:41 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/05 16:52:40 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/06 12:11:31 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,8 @@ void	put_dongle(t_dongle *dongle, int cooldown)
 	pthread_mutex_lock(&dongle->lock);
 	dongle->available = 1;
 	dongle->available_at = now + cooldown;
-	pthread_mutex_unlock(&dongle->lock);
 	pthread_cond_broadcast(&dongle->cond);
+	pthread_mutex_unlock(&dongle->lock);
 }
 
 void	release_dongles(t_coder *coder)

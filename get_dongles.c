@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/04 17:10:42 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/05 17:29:33 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/06 14:47:48 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,8 @@ t_request	req_push_to_heap(t_coder *coder)
 	{
 		pthread_mutex_lock(&coder->args->mtx_fifo);
 		req.key = coder->args->fifo_order++;
-		req.tie_breaker = req.key;
 		pthread_mutex_unlock(&coder->args->mtx_fifo);
+		req.tie_breaker = req.key;
 	}
 	else
 	{
@@ -50,6 +50,7 @@ t_request	req_push_to_heap(t_coder *coder)
 		req.tie_breaker = coder->args->fifo_order++;
 		pthread_mutex_unlock(&coder->args->mtx_fifo);
 	}
+	req.id = req.tie_breaker;
 	heap_push(&coder->dongles[coder->first_dg], req);
 	heap_push(&coder->dongles[coder->second_dg], req);
 	return (req);

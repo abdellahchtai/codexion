@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/26 19:29:43 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/05 17:22:03 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/06 14:47:41 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,12 +46,22 @@ long	get_time_on_ms(t_coder *coder)
 
 void	wait_dongles(t_dongle *first, t_dongle *second)
 {
-	struct timeval	tv;
 	struct timespec	ts;
+	long			target_ms;
+	long			now_ms;
 
-	gettimeofday(&tv, NULL);
-	ts.tv_sec = tv.tv_sec;
-	ts.tv_nsec = tv.tv_usec * 1000 + 2000000;
+	now_ms = get_time_on_ms(NULL);
+	pthread_mutex_lock(&first->lock);
+	target_ms = first->available_at;
+	pthread_mutex_unlock(&first->lock);
+	pthread_mutex_lock(&second->lock);
+	if (second->available_at > target_ms)
+		target_ms = second->available_at;
+	pthread_mutex_unlock(&second->lock);
+	if (target_ms <= now_ms)
+		target_ms = now_ms + 1;
+	ts.tv_sec = target_ms / 1000;
+	ts.tv_nsec = (target_ms % 1000) * 1000000;
 	pthread_mutex_lock(&first->lock);
 	pthread_cond_timedwait(&first->cond, &first->lock, &ts);
 	pthread_mutex_unlock(&first->lock);

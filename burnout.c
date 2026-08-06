@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/26 19:04:16 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/05 17:22:58 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/06 12:08:54 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,10 @@ int	check_last_compilation(t_coder *coder)
 	int		flag;
 	long	now;
 
+	pthread_mutex_lock(&coder->args->finished_mutex);
 	if (coder->finished)
-		return (0);
+		return (pthread_mutex_unlock(&coder->args->finished_mutex), 0);
+	pthread_mutex_unlock(&coder->args->finished_mutex);
 	flag = 0;
 	pthread_mutex_lock(&(coder->mutex_last_compile));
 	now = get_time_on_ms(NULL);

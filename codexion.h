@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 17:25:35 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/05 17:23:10 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/06 13:00:28 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ typedef struct request
 	int					coder_id;
 	long				key;
 	long				tie_breaker;
+	int					id;
 }						t_request;
 
 typedef struct dongle

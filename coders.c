@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/26 19:35:57 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/05 17:22:49 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/06 12:03:06 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,8 +62,8 @@ void	*coders_routine(void *args)
 			return (NULL);
 		repeat--;
 	}
-	coder->finished = 1;
 	pthread_mutex_lock(&(coder->args->finished_mutex));
+	coder->finished = 1;
 	coder->args->finished_coders++;
 	pthread_mutex_unlock(&(coder->args->finished_mutex));
 	return (NULL);
