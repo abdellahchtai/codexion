@@ -4,8 +4,8 @@ CC = cc
 
 FLAGS = -Wall -Wextra -Werror -pthread
 
-SRC = burnout.c  clean.c  coders.c get_dongles.c heap.c \
-		init.c main.c parse_args.c release_dongles.c  shared_utils.c
+SRC = src/burnout.c  src/clean.c  src/coders.c src/get_dongles.c src/heap.c \
+		src/init.c src/main.c src/parse_args.c src/release_dongles.c  src/shared_utils.c
 
 OBJ = $(SRC:.c=.o)
 

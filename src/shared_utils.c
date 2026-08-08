@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/26 19:29:43 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/06 14:47:41 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/08 18:59:16 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,4 @@ void	wait_dongles(t_dongle *first, t_dongle *second)
 	pthread_mutex_lock(&first->lock);
 	pthread_cond_timedwait(&first->cond, &first->lock, &ts);
 	pthread_mutex_unlock(&first->lock);
-	pthread_mutex_lock(&second->lock);
-	pthread_cond_timedwait(&second->cond, &second->lock, &ts);
-	pthread_mutex_unlock(&second->lock);
 }

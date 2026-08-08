@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 17:25:35 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/06 13:00:28 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/08 14:39:10 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,11 +56,11 @@ typedef struct dongle
 {
 	int					available;
 	int					heap_size;
-	long				available_at;
 	int					heap_capacity;
+	long				available_at;
+	t_request			*heap;
 	pthread_cond_t		cond;
 	pthread_mutex_t		lock;
-	t_request			*heap;
 }						t_dongle;
 
 typedef struct coder
