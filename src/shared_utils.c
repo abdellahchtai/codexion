@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/26 19:29:43 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/08 18:59:16 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/08 19:07:28 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,13 +51,11 @@ void	wait_dongles(t_dongle *first, t_dongle *second)
 	long			now_ms;
 
 	now_ms = get_time_on_ms(NULL);
-	pthread_mutex_lock(&first->lock);
+	lock_unlock_dongles(first, second, 1);
 	target_ms = first->available_at;
-	pthread_mutex_unlock(&first->lock);
-	pthread_mutex_lock(&second->lock);
 	if (second->available_at > target_ms)
 		target_ms = second->available_at;
-	pthread_mutex_unlock(&second->lock);
+	lock_unlock_dongles(first, second, 0);
 	if (target_ms <= now_ms)
 		target_ms = now_ms + 1;
 	ts.tv_sec = target_ms / 1000;
