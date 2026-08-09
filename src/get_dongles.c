@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/04 17:10:42 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/09 16:47:38 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/09 18:20:41 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,14 @@ int	heap_top(t_dongle *dongle)
 	return (dongle->heap[0].coder_id);
 }
 
-int    dongles_ready(t_dongle *first, t_dongle *second, t_request req)
+int	dongles_ready(t_dongle *first, t_dongle *second, t_request req)
 {
-    long    now;
+	long	now;
 
-    now = get_time_on_ms(NULL);
-    return (first->available && (now + 1) >= first->available_at
-        && second->available && (now + 1) >= second->available_at
-        && heap_top(first) == req.coder_id && heap_top(second) == req.coder_id);
+	now = get_time_on_ms(NULL);
+	return (first->available && (now + 1) >= first->available_at
+		&& second->available && (now + 1) >= second->available_at
+		&& heap_top(first) == req.coder_id && heap_top(second) == req.coder_id);
 }
 
 t_request	req_push_to_heap(t_coder *coder)
@@ -80,9 +80,9 @@ void	use_dongles(t_coder *coder, int one_coder_flag)
 
 int	get_both_dongles(t_coder *coder)
 {
-	t_dongle		*first;
-	t_dongle		*second;
-	t_request		req;
+	t_dongle	*first;
+	t_dongle	*second;
+	t_request	req;
 
 	first = &coder->dongles[coder->first_dg];
 	second = &coder->dongles[coder->second_dg];

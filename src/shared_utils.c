@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/26 19:29:43 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/09 17:51:44 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/09 18:20:58 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,47 +44,44 @@ long	get_time_on_ms(t_coder *coder)
 		- coder->args->start_simu);
 }
 
-void    wait_dongles(t_dongle *first, t_dongle *second)
+void	wait_helper(t_dongle *dongle, int cooldown_wait)
 {
-    long    now_ms;
-    long    target_ms;
-    int        first_avail;
-    int        second_avail;
+	if (!cooldown_wait)
+	{
+		pthread_mutex_lock(&dongle->lock);
+		if (!dongle->available)
+			pthread_cond_wait(&dongle->cond, &dongle->lock);
+		pthread_mutex_unlock(&dongle->lock);
+		return ;
+	}
+	usleep(cooldown_wait * 1000);
+}
 
-    lock_unlock_dongles(first, second, 1);
-    first_avail = first->available;
-    second_avail = second->available;
-    target_ms = first->available_at;
-    if (second->available_at > target_ms)
-        target_ms = second->available_at;
-    lock_unlock_dongles(first, second, 0);
-    now_ms = get_time_on_ms(NULL);
-    if (!first_avail)
-    {
-        pthread_mutex_lock(&first->lock);
-        if (!first->available)
-            pthread_cond_wait(&first->cond, &first->lock);
-        pthread_mutex_unlock(&first->lock);
-    }
-    else if (!second_avail)
-    {
-        pthread_mutex_lock(&second->lock);
-        if (!second->available)
-            pthread_cond_wait(&second->cond, &second->lock);
-        pthread_mutex_unlock(&second->lock);
-    }
-    else if (target_ms > now_ms)
-    {
-        long    diff;
+void	wait_dongles(t_dongle *first, t_dongle *second)
+{
+	long	now;
+	long	target_ms;
+	int		first_avail;
+	int		second_avail;
 
-        diff = target_ms - now_ms;
-        if (diff > 0)
-            usleep(diff * 1000);
-    }
-    else
-    {
-        pthread_mutex_lock(&first->lock);
-        pthread_cond_wait(&first->cond, &first->lock);
-        pthread_mutex_unlock(&first->lock);
-    }
+	lock_unlock_dongles(first, second, 1);
+	first_avail = first->available;
+	second_avail = second->available;
+	target_ms = first->available_at;
+	if (second->available_at > target_ms)
+		target_ms = second->available_at;
+	lock_unlock_dongles(first, second, 0);
+	now = get_time_on_ms(NULL);
+	if (!first_avail)
+		wait_helper(first, 0);
+	else if (!second_avail)
+		wait_helper(second, 0);
+	else if (target_ms > now)
+		wait_helper(NULL, target_ms - now);
+	else
+	{
+		pthread_mutex_lock(&first->lock);
+		pthread_cond_wait(&first->cond, &first->lock);
+		pthread_mutex_unlock(&first->lock);
+	}
 }
