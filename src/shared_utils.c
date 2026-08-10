@@ -6,7 +6,7 @@
 /*   By: abchtaib <abchtaib@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/26 19:29:43 by abchtaib          #+#    #+#             */
-/*   Updated: 2026/08/09 18:56:09 by abchtaib         ###   ########.fr       */
+/*   Updated: 2026/08/10 09:59:17 by abchtaib         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ void	wait_helper(t_dongle *dongle, int cooldown_wait)
 		return ;
 	}
 	pthread_mutex_lock(&dongle->lock);
-	if (!dongle->available)
+	while (!dongle->available)
 		pthread_cond_wait(&dongle->cond, &dongle->lock);
 	pthread_mutex_unlock(&dongle->lock);
 }
@@ -79,9 +79,5 @@ void	wait_dongles(t_dongle *first, t_dongle *second)
 	else if (target_ms > now_ms)
 		wait_helper(NULL, target_ms - now_ms);
 	else
-	{
-		pthread_mutex_lock(&first->lock);
-		pthread_cond_wait(&first->cond, &first->lock);
-		pthread_mutex_unlock(&first->lock);
-	}
+		usleep(1000);
 }
